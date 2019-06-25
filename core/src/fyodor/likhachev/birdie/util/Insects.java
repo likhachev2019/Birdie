@@ -1,4 +1,4 @@
-package fyodor.likhachev.birdie.sprites;
+package fyodor.likhachev.birdie.util;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -10,10 +10,8 @@ import fyodor.likhachev.birdie.states.PlayState;
 
 public class Insects {
 
-
-
     public static int width, height = 50;
-    static final int MOVEMENT = 50;
+    public static final int MOVEMENT = 50;
     private static final int COUNT = 3;
     private static Array<TextureRegion> insects = new Array<TextureRegion>();
 
@@ -28,7 +26,7 @@ public class Insects {
     // Индекс региона текстуры, которая былы возвращена последней
     private static int type = -1;
 
-    static TextureRegion getRndTexture() {
+    public static TextureRegion getRndTexture() {
         double n = Math.random();
         if (n <= 0.45){
             type = 0;
@@ -44,7 +42,7 @@ public class Insects {
         }
     }
 
-    static int getType() {
+    public static int getType() {
         return type;
     }
 }

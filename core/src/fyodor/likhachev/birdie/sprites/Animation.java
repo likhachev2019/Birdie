@@ -19,8 +19,6 @@ public class Animation {
     private int frame;
     private int frameWidth, frameHeight;
 
-    boolean end;
-
     /**
      * Конструктор
      * @param region регион текстур
@@ -54,7 +52,6 @@ public class Animation {
         if (frame >= frameCount){
             frame = 0;
             res = true;
-            end = true;
         }
         return res;
     }
@@ -72,16 +69,12 @@ public class Animation {
         return frameHeight;
     }
 
-    TextureRegion getSecondFrame() {
-        return frames.get(1);
-    }
-
-    TextureRegion getFirstFrame() {
-        return frames.get(0);
-    }
-
-    void dispose(){
+    public void dispose(){
         for (TextureRegion tr : frames)
             tr.getTexture().dispose();
+    }
+
+    TextureRegion getFrame(int frame) {
+        return frames.get(frame);
     }
 }

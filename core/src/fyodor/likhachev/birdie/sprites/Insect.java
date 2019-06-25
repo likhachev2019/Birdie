@@ -3,6 +3,8 @@ package fyodor.likhachev.birdie.sprites;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
+import fyodor.likhachev.birdie.util.Insects;
+
 public class Insect {
 
     private TextureRegion texture;

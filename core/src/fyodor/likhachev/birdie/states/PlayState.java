@@ -16,6 +16,8 @@ import fyodor.likhachev.birdie.sprites.Achivka;
 import fyodor.likhachev.birdie.sprites.Box;
 import fyodor.likhachev.birdie.sprites.BoxUnit;
 import fyodor.likhachev.birdie.sprites.Cat;
+import fyodor.likhachev.birdie.sprites.FirTree;
+import fyodor.likhachev.birdie.sprites.Plant;
 import fyodor.likhachev.birdie.sprites.Raven;
 import fyodor.likhachev.birdie.sprites.Hawk;
 import fyodor.likhachev.birdie.sprites.Birdie;
@@ -23,7 +25,7 @@ import fyodor.likhachev.birdie.sprites.Bush;
 import fyodor.likhachev.birdie.sprites.Button;
 import fyodor.likhachev.birdie.sprites.Hedgehog;
 import fyodor.likhachev.birdie.sprites.Insect;
-import fyodor.likhachev.birdie.sprites.Insects;
+import fyodor.likhachev.birdie.util.Insects;
 
 // Игровой экран
 public class PlayState extends State {
@@ -42,7 +44,7 @@ public class PlayState extends State {
     private Texture tree;
     private Vector2 groundPos1, groundPos2;
     private Button upButton, downButton, rightButton, leftButton;
-    private Array<Bush> bushes;
+    private Array<Plant> plants;
     private Array<Insect> insects;
     private int score = 0;
     private BitmapFont scoreFont = new BitmapFont();
@@ -72,7 +74,7 @@ public class PlayState extends State {
         rightButton = new Button(texture, WIDTH - texture.getWidth() - 5, texture.getHeight()/2);
         texture = new Texture("leftButton.png");
         leftButton = new Button(texture, WIDTH - texture.getWidth()*3 - 10, texture.getHeight()/2);
-        bushes = new Array<Bush>();
+        plants = new Array<Plant>();
         insects = new Array<Insect>();
         Insects.init();
         minFlyHeight = PlayState.GROUND_HEIGHT + Bush.HEIGHT;;
@@ -126,7 +128,7 @@ public class PlayState extends State {
             handleInput();
         birdie.update(dt);
         groundUpdate();
-        bushesUpdate();
+        plantsUpdate();
         insectsUpdate();
         hawkUpdate(dt);
         ravenUpdate(dt);
@@ -155,8 +157,8 @@ public class PlayState extends State {
         if (secretBox == null){
             if (Math.random() < 0.008){
                 float x = camera.position.x + camera.viewportWidth/2;
-                if (bushes.size != 0){
-                    boundsBuffer = bushes.get(bushes.size - 1).getBounds();
+                if (plants.size != 0){
+                    boundsBuffer = plants.get(plants.size - 1).getBounds();
                     // если коробка слишком близко к кусту, сдвинем её вправо
                     if (boundsBuffer.x + boundsBuffer.width + Box.INDENT > x)
                         x = boundsBuffer.x + boundsBuffer.width + Box.INDENT;
@@ -202,13 +204,13 @@ public class PlayState extends State {
             else if (hawk != null && i.isInside(boundsBuffer))
                 insects.removeValue(i, false);
         }
-        for (Bush b : bushes) {
-            bounds = b.getBounds();
-            if (bounds.x + bounds.width < camera.position.x - camera.viewportWidth/2){
-                b.dispose();
-                bushes.removeValue(b, false);
+        for (Plant plant : plants) {
+            bounds = plant.getBounds();
+            if (bounds.getX() + bounds.getWidth() < camera.position.x - camera.viewportWidth/2){
+                plant.dispose();
+                plants.removeValue(plant, false);
             }
-            else if (b.isIntersection(birdieBounds))
+            else if (plant.isIntersection(birdieBounds))
                 birdie.minusHeart();
         }
         if (hawk != null)
@@ -274,23 +276,31 @@ public class PlayState extends State {
         }
     }
 
-    private void bushesUpdate() {
-        if (Math.random() <= 0.002){
-            Bush b;
+    private void plantsUpdate() {
+        double n = Math.random();
+        if (n <= 0.02){
+            Plant plant = null;
             int x = Math.round(camera.position.x + camera.viewportWidth);
             // чтобы не залазил на коробку
             if (secretBox != null && secretBox.getRightX() + Box.INDENT > x)
                 x = Math.round(secretBox.getRightX() + Box.INDENT*2);
-            if (bushes.size == 0){
-                b = new Bush(x, GROUND_HEIGHT);
-                bushes.add(b);
+            if (plants.size == 0){
+                if (n <= 0.001)
+                    plant = new Bush(x, GROUND_HEIGHT);
+                else
+                    plant = new FirTree(x, GROUND_HEIGHT);
+                plants.add(plant);
             }
             else {
-                Rectangle pastBounds = bushes.get(bushes.size - 1).getBounds();
-                if (pastBounds.x + pastBounds.width < x){
-                    b = new Bush(x, GROUND_HEIGHT );
-                    bushes.add(b);
-                }
+                boundsBuffer = plants.get(plants.size - 1).getBounds();
+                float pastX = boundsBuffer.getX() + boundsBuffer.getWidth();
+                if (pastX > x)
+                    x = (int) pastX + 1;
+                if (n <= 0.0001)
+                    plant = new Bush(x, GROUND_HEIGHT);
+                else
+                    plant = new FirTree(x, GROUND_HEIGHT);;
+                plants.add(plant);
             }
         }
     }
@@ -301,7 +311,7 @@ public class PlayState extends State {
         sb.setProjectionMatrix(camera.combined);
         sb.begin();
         sb.draw(bg, camera.position.x - camera.viewportWidth/2, 0, WIDTH, HEIGHT);
-        bushRender(sb);
+        plantRender(sb);
         sb.draw(ground, groundPos1.x, groundPos1.y, WIDTH, GROUND_HEIGHT);
         sb.draw(ground, groundPos2.x, groundPos2.y, WIDTH, GROUND_HEIGHT);
         if (secretBox != null){
@@ -329,7 +339,6 @@ public class PlayState extends State {
         for (Raven r : ravens) {
             boundsBuffer = r.getBounds();
             if (boundsBuffer.x + boundsBuffer.width < camera.position.x - camera.viewportWidth || boundsBuffer.y + boundsBuffer.height < 0){
-                r.dispose();
                 ravens.removeValue(r, false);
             }
             else sb.draw(r.getTexture(), boundsBuffer.x, boundsBuffer.y);
@@ -340,7 +349,6 @@ public class PlayState extends State {
         for (BoxUnit boxUnit: boxUnits) {
             boundsBuffer = boxUnit.getBounds();
             if (boundsBuffer.x + boundsBuffer.width < camera.position.x - camera.viewportWidth/2){
-                boxUnit.dispose();
                 boxUnits.removeValue(boxUnit, false);
             }
             else
@@ -385,9 +393,9 @@ public class PlayState extends State {
             sb.draw(insect.getTexture(), insect.getBounds().x, insect.getBounds().y);
     }
 
-    private void bushRender(SpriteBatch sb) {
-        for (Bush b : bushes)
-            sb.draw(b.getTexture(), b.getBounds().x, b.getBounds().y - Bush.DOWN_STEP);
+    private void plantRender(SpriteBatch sb) {
+        for (Plant b : plants)
+            sb.draw(b.getTexture(), b.getBounds().getX(), b.getBounds().getY());
     }
 
     private void heartRender(SpriteBatch sb) {

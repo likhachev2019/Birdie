@@ -48,9 +48,9 @@ public class Birdie {
                 hs[i] = heartAnimation.getCurFrame();
             }
             else if (i >= heartBalance)
-                hs[i] = heartAnimation.getSecondFrame(); // Пустое сердце
+                hs[i] = heartAnimation.getFrame(1); // Пустое сердце
             else
-                hs[i] = heartAnimation.getFirstFrame(); // Целое сердце
+                hs[i] = heartAnimation.getFrame(0); // Целое сердце
         }
         return hs;
     }

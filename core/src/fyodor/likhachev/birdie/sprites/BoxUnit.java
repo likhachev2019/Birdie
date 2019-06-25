@@ -8,25 +8,24 @@ public abstract class BoxUnit {
 
     protected Rectangle bounds;
     protected Vector2 velocity;
-    protected Animation animation;
 
     public abstract void update(float dt);
+
+    // Анимация внутри объекта ворона, чтобы не загружать к каждому текстуру - она общая
+    protected float curFrameTime;
+    protected int frame;
+
+    abstract boolean animationUpdate(float dt);
 
     public boolean isIntersection(Rectangle rect) {
         return rect.contains(bounds.x, bounds.y + bounds.height)
                 || rect.contains(bounds.x + bounds.width, bounds.y + bounds.height);
     }
 
-    public void dispose() {
-        animation.dispose();
-    }
-
     public Rectangle getBounds() {
         return bounds;
     }
 
-    public TextureRegion getTexture() {
-        return animation.getCurFrame();
-    }
+    public abstract TextureRegion getTexture();
 
 }
