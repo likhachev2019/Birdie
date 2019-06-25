@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import fyodor.likhachev.birdie.MyGame;
 import fyodor.likhachev.birdie.sprites.Birdie;
 import fyodor.likhachev.birdie.sprites.Button;
+import fyodor.likhachev.birdie.sprites.Joystick;
 import fyodor.likhachev.birdie.sprites.Tree;
 
 public class StartState extends State{
@@ -21,6 +22,7 @@ public class StartState extends State{
     private Texture tree;
     private Texture ground;
     private Button upButton, downButton, rightButton, leftButton;
+    private Joystick joystick;
 
     public StartState(GameStateManager gsm) {
         super(gsm);
@@ -32,13 +34,15 @@ public class StartState extends State{
         ground = new Texture("ground.png");
         GROUND_HEIGHT = ground.getHeight()*2;
         Texture texture = new Texture("upButton.png");
-        upButton = new Button(texture,WIDTH - texture.getWidth()*2 - 5, texture.getHeight() + 15);
-        texture = new Texture("downButton.png");
-        downButton = new Button(texture,WIDTH - texture.getWidth()*2 - 5,  5);
-        texture = new Texture("rightButton.png");
-        rightButton = new Button(texture, WIDTH - texture.getWidth() - 5, texture.getHeight()/2);
-        texture = new Texture("leftButton.png");
-        leftButton = new Button(texture, WIDTH - texture.getWidth()*3 - 10, texture.getHeight()/2);
+//        upButton = new Button(texture,WIDTH - texture.getWidth()*2 - 5, texture.getHeight() + 15);
+//        texture = new Texture("downButton.png");
+//        downButton = new Button(texture,WIDTH - texture.getWidth()*2 - 5,  5);
+//        texture = new Texture("rightButton.png");
+//        rightButton = new Button(texture, WIDTH - texture.getWidth() - 5, texture.getHeight()/2);
+//        texture = new Texture("leftButton.png");
+//        leftButton = new Button(texture, WIDTH - texture.getWidth()*3 - 10, texture.getHeight()/2);
+        texture = Joystick.joystickFraming;
+        joystick = new Joystick(WIDTH - texture.getWidth() - 15, 15);
     }
 
     @Override
@@ -61,10 +65,12 @@ public class StartState extends State{
         sb.draw(ground, 0, 0, WIDTH, GROUND_HEIGHT);
         sb.draw(tree, 0,0);
         sb.draw(birdie.getBirdie(), birdie.getPosition().x, birdie.getPosition().y);
-        sb.draw(upButton.getTexture(),camera.position.x - camera.viewportWidth/2 + upButton.getPosition().x, upButton.getPosition().y );
-        sb.draw(downButton.getTexture(),camera.position.x - camera.viewportWidth/2 + downButton.getPosition().x, downButton.getPosition().y);
-        sb.draw(rightButton.getTexture(), camera.position.x - camera.viewportWidth/2 + rightButton.getPosition().x, rightButton.getPosition().y);
-        sb.draw(leftButton.getTexture(), camera.position.x - camera.viewportWidth/2 + leftButton.getPosition().x, leftButton.getPosition().y);
+//        sb.draw(upButton.getTexture(),camera.position.x - camera.viewportWidth/2 + upButton.getPosition().x, upButton.getPosition().y );
+//        sb.draw(downButton.getTexture(),camera.position.x - camera.viewportWidth/2 + downButton.getPosition().x, downButton.getPosition().y);
+//        sb.draw(rightButton.getTexture(), camera.position.x - camera.viewportWidth/2 + rightButton.getPosition().x, rightButton.getPosition().y);
+//        sb.draw(leftButton.getTexture(), camera.position.x - camera.viewportWidth/2 + leftButton.getPosition().x, leftButton.getPosition().y);
+        sb.draw(Joystick.joystickFraming, camera.position.x - camera.viewportWidth/2 + joystick.framingX, joystick.framingY);
+        sb.draw(joystick.getJoystick(), camera.position.x - camera.viewportWidth/2 + joystick.joystickX, joystick.joystickY);
         sb.end();
     }
 

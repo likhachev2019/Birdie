@@ -17,6 +17,7 @@ import fyodor.likhachev.birdie.sprites.Box;
 import fyodor.likhachev.birdie.sprites.BoxUnit;
 import fyodor.likhachev.birdie.sprites.Cat;
 import fyodor.likhachev.birdie.sprites.FirTree;
+import fyodor.likhachev.birdie.sprites.Joystick;
 import fyodor.likhachev.birdie.sprites.Plant;
 import fyodor.likhachev.birdie.sprites.Raven;
 import fyodor.likhachev.birdie.sprites.Hawk;
@@ -53,6 +54,7 @@ public class PlayState extends State {
     private Box secretBox;
     private Array<BoxUnit> boxUnits = new Array<BoxUnit>();
     private Array<Raven> ravens = new Array<Raven>();
+    private Joystick joystick;
 
     public PlayState(GameStateManager gsm) {
         super(gsm);
@@ -67,13 +69,15 @@ public class PlayState extends State {
         // Вторая следует сразу за первой
         groundPos2 = new Vector2(camera.position.x - camera.viewportWidth/2 + WIDTH,0);
         Texture texture = new Texture("upButton.png");
-        upButton = new Button(texture,WIDTH - texture.getWidth()*2 - 5, texture.getHeight() + 15);
-        texture = new Texture("downButton.png");
-        downButton = new Button(texture,WIDTH - texture.getWidth()*2 - 5,  5);
-        texture = new Texture("rightButton.png");
-        rightButton = new Button(texture, WIDTH - texture.getWidth() - 5, texture.getHeight()/2);
-        texture = new Texture("leftButton.png");
-        leftButton = new Button(texture, WIDTH - texture.getWidth()*3 - 10, texture.getHeight()/2);
+//        upButton = new Button(texture,WIDTH - texture.getWidth()*2 - 5, texture.getHeight() + 15);
+//        texture = new Texture("downButton.png");
+//        downButton = new Button(texture,WIDTH - texture.getWidth()*2 - 5,  5);
+//        texture = new Texture("rightButton.png");
+//        rightButton = new Button(texture, WIDTH - texture.getWidth() - 5, texture.getHeight()/2);
+//        texture = new Texture("leftButton.png");
+//        leftButton = new Button(texture, WIDTH - texture.getWidth()*3 - 10, texture.getHeight()/2);
+        texture = Joystick.joystickFraming;
+        joystick = new Joystick(WIDTH - texture.getWidth() - 15, 15);
         plants = new Array<Plant>();
         insects = new Array<Insect>();
         Insects.init();
@@ -84,38 +88,51 @@ public class PlayState extends State {
         scoreFont.getData().setScale(2);
     }
 
+    private boolean pressJoystick; // активирует ли зажатый палец джойстик
+
     @Override
     protected void handleInput() {
+        Vector3 viewpointCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        float pressX = WIDTH - camera.position.x - camera.viewportWidth/2 + viewpointCoords.x;
+
+        if (Gdx.input.justTouched()){
+            pressJoystick = joystick.contains(pressX, viewpointCoords.y);
+        }
         if (Gdx.input.isTouched()){
 //            Конвертируем реальные координаты в коодринаты области просмотра, которую мы установили
-            Vector3 viewpointCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+            viewpointCoords = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+            if (pressJoystick){
+                // передаём х нажатой точки, сдвинув его в пределы width, чтобы джойстик мог найти правильную дельту по х используя свои исходные коорд-ы
+                Vector3 vect = joystick.update(pressX, viewpointCoords.y);
+                birdie.move(vect,camera.position.x - camera.viewportWidth/2, camera.position.x + camera.viewportWidth/2);
+            }
 
-            float curUpButX =  camera.position.x - camera.viewportWidth/2 + upButton.getPosition().x;
-            float curRButX = curUpButX + upButton.getBounds().width + 5;
-            float curLButX = curUpButX - upButton.getBounds().width - 5;
-            float coordXBuf;
-            // Координату х проверяем отдельно, поэтому в векторе она всегда верная
-            if (viewpointCoords.x >= curUpButX && viewpointCoords.x <= curUpButX + upButton.getBounds().width){
-                coordXBuf = viewpointCoords.x;
-                viewpointCoords.x = upButton.getPosition().x;
-                if(upButton.isTouched(viewpointCoords))
-                    birdie.up();
-                else if (downButton.isTouched(viewpointCoords))
-                    birdie.down();
-                viewpointCoords.x = coordXBuf;
-            }
-            // Правая кнопка
-            if(viewpointCoords.x >= curRButX && viewpointCoords.x <= curRButX + upButton.getBounds().width){
-                viewpointCoords.x = rightButton.getPosition().x;
-                if (rightButton.isTouched(viewpointCoords))
-                    birdie.forward(camera.position.x + camera.viewportWidth/2);
-            }
-            // Левая кнопка
-            else if(viewpointCoords.x >= curLButX && viewpointCoords.x <= curLButX + upButton.getBounds().width){
-                viewpointCoords.x = leftButton.getPosition().x;
-                if (leftButton.isTouched(viewpointCoords))
-                    birdie.back(camera.position.x - camera.viewportWidth/2);
-            }
+//            float curUpButX =  camera.position.x - camera.viewportWidth/2 + upButton.getPosition().x;
+//            float curRButX = curUpButX + upButton.getBounds().width + 5;
+//            float curLButX = curUpButX - upButton.getBounds().width - 5;
+//            float coordXBuf;
+//            // Координату х проверяем отдельно, поэтому в векторе она всегда верная
+//            if (viewpointCoords.x >= curUpButX && viewpointCoords.x <= curUpButX + upButton.getBounds().width){
+//                coordXBuf = viewpointCoords.x;
+//                viewpointCoords.x = upButton.getPosition().x;
+//                if(upButton.isTouched(viewpointCoords))
+//                    birdie.up();
+//                else if (downButton.isTouched(viewpointCoords))
+//                    birdie.down();
+//                viewpointCoords.x = coordXBuf;
+//            }
+//            // Правая кнопка
+//            if(viewpointCoords.x >= curRButX && viewpointCoords.x <= curRButX + upButton.getBounds().width){
+//                viewpointCoords.x = rightButton.getPosition().x;
+//                if (rightButton.isTouched(viewpointCoords))
+//                    birdie.forward(camera.position.x + camera.viewportWidth/2);
+//            }
+//            // Левая кнопка
+//            else if(viewpointCoords.x >= curLButX && viewpointCoords.x <= curLButX + upButton.getBounds().width){
+//                viewpointCoords.x = leftButton.getPosition().x;
+//                if (leftButton.isTouched(viewpointCoords))
+//                    birdie.back(camera.position.x - camera.viewportWidth/2);
+//            }
         }
     }
 
@@ -130,8 +147,10 @@ public class PlayState extends State {
         groundUpdate();
         plantsUpdate();
         insectsUpdate();
-        hawkUpdate(dt);
-        ravenUpdate(dt);
+        if (tree == null){
+            hawkUpdate(dt);
+            ravenUpdate(dt);
+        }
         secretBoxUpdate();
         for (BoxUnit bu : boxUnits)
             bu.update(dt);
@@ -176,7 +195,7 @@ public class PlayState extends State {
     private void hawkUpdate(float dt) {
         if (hawk == null){
             double n = Math.random();
-            if( n < 0.08) {
+            if( n < 0.008) {
                 n = MyGame.rnd.nextInt(WIDTH);
                 // Прибавляем к х - текущему началу экрана рандомное число, по величине не больше ширины экрана
                 float x = camera.position.x - camera.viewportWidth/2 + (float) n;
@@ -234,15 +253,15 @@ public class PlayState extends State {
     private void openSecretBox() {
         secretBox.dispose();
         double n = Math.random();
-        if (n < 0.3){
+        if (n <= 0.4){
             boxUnits.add(new Cat((int)secretBox.getLeftX(), GROUND_HEIGHT));
             achivki.add(new Achivka("CAT!", secretBox.getLeftX(), secretBox.getUpY()));
         }
-        else if (n <= 0.6){
+        else if (n <= 0.8){
             boxUnits.add(new Hedgehog((int)secretBox.getLeftX(), GROUND_HEIGHT));
             achivki.add(new Achivka("HEDGEHOG!", secretBox.getLeftX(), secretBox.getUpY()));
         }
-        else if (n <= 0.9){
+        else if (n <= 1){
             insectBonusCount = 100;
             achivki.add(new Achivka("100 INSECTS!", secretBox.getLeftX(), secretBox.getUpY()));
         }
@@ -278,14 +297,14 @@ public class PlayState extends State {
 
     private void plantsUpdate() {
         double n = Math.random();
-        if (n <= 0.02){
+        if (n <= 0.0008){
             Plant plant = null;
             int x = Math.round(camera.position.x + camera.viewportWidth);
             // чтобы не залазил на коробку
             if (secretBox != null && secretBox.getRightX() + Box.INDENT > x)
                 x = Math.round(secretBox.getRightX() + Box.INDENT*2);
             if (plants.size == 0){
-                if (n <= 0.001)
+                if (n <= 0.0004)
                     plant = new Bush(x, GROUND_HEIGHT);
                 else
                     plant = new FirTree(x, GROUND_HEIGHT);
@@ -296,7 +315,7 @@ public class PlayState extends State {
                 float pastX = boundsBuffer.getX() + boundsBuffer.getWidth();
                 if (pastX > x)
                     x = (int) pastX + 1;
-                if (n <= 0.0001)
+                if (n <= 0.0004)
                     plant = new Bush(x, GROUND_HEIGHT);
                 else
                     plant = new FirTree(x, GROUND_HEIGHT);;
@@ -315,8 +334,8 @@ public class PlayState extends State {
         sb.draw(ground, groundPos1.x, groundPos1.y, WIDTH, GROUND_HEIGHT);
         sb.draw(ground, groundPos2.x, groundPos2.y, WIDTH, GROUND_HEIGHT);
         if (secretBox != null){
-            Rectangle b = secretBox.getBounds();
-            sb.draw(secretBox.getTexture(), b.x, b.y);
+            boundsBuffer = secretBox.getBounds();
+            sb.draw(secretBox.getTexture(), boundsBuffer.x, boundsBuffer.y);
         }
             boxUnitRender(sb);
         if (tree != null)
@@ -326,13 +345,19 @@ public class PlayState extends State {
         sb.draw(birdie.getBirdie(), birdie.getPosition().x, birdie.getPosition().y);
         achivkRender(sb);
         hawkRender(sb);
-        sb.draw(upButton.getTexture(),camera.position.x - camera.viewportWidth/2 + upButton.getPosition().x, upButton.getPosition().y );
-        sb.draw(downButton.getTexture(),camera.position.x - camera.viewportWidth/2 + downButton.getPosition().x, downButton.getPosition().y);
-        sb.draw(rightButton.getTexture(), camera.position.x - camera.viewportWidth/2 + rightButton.getPosition().x, rightButton.getPosition().y);
-        sb.draw(leftButton.getTexture(), camera.position.x - camera.viewportWidth/2 + leftButton.getPosition().x, leftButton.getPosition().y);
+//        sb.draw(upButton.getTexture(),camera.position.x - camera.viewportWidth/2 + upButton.getPosition().x, upButton.getPosition().y );
+//        sb.draw(downButton.getTexture(),camera.position.x - camera.viewportWidth/2 + downButton.getPosition().x, downButton.getPosition().y);
+//        sb.draw(rightButton.getTexture(), camera.position.x - camera.viewportWidth/2 + rightButton.getPosition().x, rightButton.getPosition().y);
+//        sb.draw(leftButton.getTexture(), camera.position.x - camera.viewportWidth/2 + leftButton.getPosition().x, leftButton.getPosition().y);
+        joystickRender(sb);
         heartRender(sb);
         scoreFont.draw(sb, "SCORE: " + score, camera.position.x + camera.viewportWidth/2 - 200, HEIGHT - 15);
         sb.end();
+    }
+
+    private void joystickRender(SpriteBatch sb) {
+        sb.draw(Joystick.joystickFraming, camera.position.x - camera.viewportWidth/2 + joystick.framingX, joystick.framingY);
+        sb.draw(joystick.getJoystick(), camera.position.x - camera.viewportWidth/2 + joystick.joystickX, joystick.joystickY);
     }
 
     private void ravenRender(SpriteBatch sb) {
@@ -354,7 +379,6 @@ public class PlayState extends State {
             else
                 sb.draw(boxUnit.getTexture(), boundsBuffer.x, boundsBuffer.y);
         }
-
     }
 
     private void treeRender(SpriteBatch sb) {

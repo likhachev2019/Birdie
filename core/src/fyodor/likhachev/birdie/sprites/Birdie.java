@@ -3,6 +3,7 @@ package fyodor.likhachev.birdie.sprites;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import fyodor.likhachev.birdie.states.PlayState;
@@ -66,33 +67,33 @@ public class Birdie {
         bounds.y = position.y;
     }
 
-    public void up() {
-        if (position.y + GRAVITY > PlayState.HEIGHT -  birdieAnimation.getFrameHeight())
-            position.set(position.x, PlayState.HEIGHT -  birdieAnimation.getFrameHeight(), 0);
-        else
-            position.add(0, GRAVITY,0);
-    }
-
-    public void down() {
-        if (position.y - GRAVITY < PlayState.getGroundHeight())
-            position.set(position.x,PlayState.getGroundHeight(), 0);
-        else
-            position.add(0, -GRAVITY,0);
-    }
-
-    public void forward(float limit) {
-        if (position.x - GRAVITY > limit - bounds.width)
-            position.set(limit - bounds.width, position.y, 0);
-        else
-            position.add(GRAVITY, 0,0);
-    }
-
-    public void back(float limit) {
-        if (position.x - GRAVITY < limit)
-            position.set(limit, position.y, 0);
-        else
-            position.add(-GRAVITY, 0,0);
-    }
+//    public void up() {
+//        if (position.y + GRAVITY > PlayState.HEIGHT -  birdieAnimation.getFrameHeight())
+//            position.set(position.x, PlayState.HEIGHT -  birdieAnimation.getFrameHeight(), 0);
+//        else
+//            position.add(0, GRAVITY,0);
+//    }
+//
+//    public void down() {
+//        if (position.y - GRAVITY < PlayState.getGroundHeight())
+//            position.set(position.x,PlayState.getGroundHeight(), 0);
+//        else
+//            position.add(0, -GRAVITY,0);
+//    }
+//
+//    public void forward(float limit) {
+//        if (position.x - GRAVITY > limit - bounds.width)
+//            position.set(limit - bounds.width, position.y, 0);
+//        else
+//            position.add(GRAVITY, 0,0);
+//    }
+//
+//    public void back(float limit) {
+//        if (position.x - GRAVITY < limit)
+//            position.set(limit, position.y, 0);
+//        else
+//            position.add(-GRAVITY, 0,0);
+//    }
 
     public void minusHeart() {
         if (curAnimeCount == 0){
@@ -118,5 +119,17 @@ public class Birdie {
 
     public Rectangle getBounds() {
         return bounds;
+    }
+
+    public void move(Vector3 vect, float lLimit, float rLimit) {
+        position.add(vect);
+        if (position.y > PlayState.HEIGHT -  birdieAnimation.getFrameHeight())
+            position.set(position.x, PlayState.HEIGHT -  birdieAnimation.getFrameHeight(), 0);
+        else if (position.y < PlayState.getGroundHeight())
+            position.set(position.x,PlayState.getGroundHeight(), 0);
+        if (position.x > rLimit - bounds.width)
+            position.set(rLimit - bounds.width, position.y, 0);
+        else if (position.x < lLimit)
+            position.set(lLimit, position.y, 0);
     }
 }
